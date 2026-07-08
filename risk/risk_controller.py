@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -37,7 +38,7 @@ class RiskController:
             self._history.pop(0)
         self._determine_mode()
         if config.KILL_SWITCH_ENABLED and self.dd_actual >= config.KILL_THRESHOLD:
-            self._activate_kill_switch(f"Drawdown {self.dd_actual:.2f}% ≥ {config.KILL_THRESHOLD}%")
+            self._activate_kill_switch(f"Drawdown {self.dd_actual:.2f}% >= {config.KILL_THRESHOLD}%")
         return self.get_metrics()
 
     def _determine_mode(self):
@@ -49,7 +50,7 @@ class RiskController:
         elif self.dd_actual < config.DD_REDUCED_LIMIT:
             self.mode = "REDUCIDO"
         else:
-            self.mode = "PROTECCIÓN"
+            self.mode = "PROTECCION"
 
     def _activate_kill_switch(self, reason: str):
         if self.kill_switch_activated:
@@ -68,9 +69,9 @@ class RiskController:
         elif self.mode == "REDUCIDO":
             return {'leverage': config.LEVERAGE_REDUCED, 'size_factor': config.SIZE_FACTOR_REDUCED,
                     'mode': 'REDUCIDO', 'trading_enabled': True, 'min_score_boost': 0.05}
-        elif self.mode == "PROTECCIÓN":
+        elif self.mode == "PROTECCION":
             return {'leverage': config.LEVERAGE_PROTECTION, 'size_factor': config.SIZE_FACTOR_PROTECTION,
-                    'mode': 'PROTECCIÓN', 'trading_enabled': True, 'min_score_boost': 0.15}
+                    'mode': 'PROTECCION', 'trading_enabled': True, 'min_score_boost': 0.15}
         else:
             return {'leverage': 0, 'size_factor': 0.0, 'mode': 'KILL',
                     'trading_enabled': False, 'min_score_boost': 1.0}
