@@ -1,0 +1,76 @@
+name: KRISHNA OMEGA ULTRA
+
+on:
+  schedule:
+    - cron: "0 */5 * * *"   # Cada 5 horas (00:00, 05:00, 10:00, 15:00, 20:00 UTC)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Modo de ejecución'
+        required: true
+        default: 'demo'
+        type: choice
+        options:
+          - backtest
+          - optimize
+          - demo
+          - live
+
+concurrency:
+  group: krishna-omega-ultra
+  cancel-in-progress: true
+
+jobs:
+  run-bot:
+    name: Ejecutar Krishna Omega Ultra
+    runs-on: ubuntu-latest
+    timeout-minutes: 360     # 6 horas (seguro, el cron reinicia a las 5h)
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Instalar dependencias
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 📁 Crear directorios
+        run: |
+          mkdir -p metrics logs snapshots optimization_results data/candles_5m
+
+      - name: 🤖 Ejecutar Krishna Omega Ultra
+        run: |
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            MODE="demo"
+          else
+            MODE="${{ github.event.inputs.mode }}"
+          fi
+          echo "Ejecutando modo: $MODE"
+          python main.py --mode $MODE
+        env:
+          OKX_API_KEY: ${{ secrets.OKX_API_KEY }}
+          OKX_SECRET_KEY: ${{ secrets.OKX_SECRET_KEY }}
+          OKX_PASSPHRASE: ${{ secrets.OKX_PASSPHRASE }}
+          OKX_DEMO: ${{ secrets.OKX_DEMO || 'true' }}
+          KRISHNA_MODE: ${{ github.event_name == 'schedule' && 'demo' || github.event.inputs.mode }}
+
+      - name: 📊 Subir artefactos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: krishna-omega-data-${{ github.run_id }}
+          path: |
+            metrics/
+            logs/
+            snapshots/
+            optimization_results/
+            backtest_trades.csv
+            *.json
+            *.csv
+          retention-days: 30
