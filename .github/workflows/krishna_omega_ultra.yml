@@ -1,12 +1,13 @@
+
 name: KRISHNA OMEGA ULTRA
 
 on:
   schedule:
-    - cron: "0 */5 * * *"   # Cada 5 horas (00:00, 05:00, 10:00, 15:00, 20:00 UTC)
+    - cron: "0 */5 * * *"
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Modo de ejecución'
+        description: 'Modo de ejecucion'
         required: true
         default: 'demo'
         type: choice
@@ -24,27 +25,27 @@ jobs:
   run-bot:
     name: Ejecutar Krishna Omega Ultra
     runs-on: ubuntu-latest
-    timeout-minutes: 360     # 6 horas (seguro, el cron reinicia a las 5h)
+    timeout-minutes: 360
 
     steps:
-      - name: ⬇️ Checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: 📦 Instalar dependencias
+      - name: Instalar dependencias
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 📁 Crear directorios
+      - name: Crear directorios
         run: |
           mkdir -p metrics logs snapshots optimization_results data/candles_5m
 
-      - name: 🤖 Ejecutar Krishna Omega Ultra
+      - name: Ejecutar Krishna Omega Ultra
         run: |
           if [ "${{ github.event_name }}" == "schedule" ]; then
             MODE="demo"
@@ -60,7 +61,7 @@ jobs:
           OKX_DEMO: ${{ secrets.OKX_DEMO || 'true' }}
           KRISHNA_MODE: ${{ github.event_name == 'schedule' && 'demo' || github.event.inputs.mode }}
 
-      - name: 📊 Subir artefactos
+      - name: Subir artefactos
         uses: actions/upload-artifact@v4
         if: always()
         with:
