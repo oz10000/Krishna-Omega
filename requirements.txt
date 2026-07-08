@@ -1,16 +1,5 @@
-# KRISHNA OMEGA ULTRA — Dependencias del sistema
 
-# Cliente HTTP para OKX API
 requests>=2.28.0
-
-# Cálculos numéricos y estadísticos
 numpy>=1.23.0
-
-# Manipulación de datos y backtesting (velas, DataFrames)
 pandas>=2.0.0
-
-# Optimización bayesiana (opcional pero recomendada)
 scikit-optimize>=0.9.0
-
-# (Opcional) Para cargar variables de entorno desde .env
-# python-dotenv>=1.0.0
