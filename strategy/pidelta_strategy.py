@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -7,7 +8,6 @@ from typing import Optional, Dict, List
 import config
 from telemetry import log_debug
 
-# ---------- INDICADORES ----------
 def compute_ker(close: pd.Series, period: int) -> pd.Series:
     abs_diff = abs(close.diff(period))
     sum_abs = close.diff().abs().rolling(period).sum()
@@ -47,11 +47,9 @@ def compute_macro(df: pd.DataFrame, period: int) -> pd.Series:
     )
     return macro.clip(0, 1)
 
-# ---------- PiDelta Score ----------
 def compute_pidelta_score(df: pd.DataFrame) -> float:
     if len(df) < 50:
         return 0.0
-    
     ker = compute_ker(df['c'], config.KER_PERIOD)
     vwap_z = compute_vwap_zscore(df, config.VWAP_PERIOD)
     atr = compute_atr(df, config.ATR_PERIOD)
@@ -61,7 +59,6 @@ def compute_pidelta_score(df: pd.DataFrame) -> float:
     momentum = df['c'].pct_change(config.MOMENTUM_PERIOD) * 100
     macro = compute_macro(df, config.MACRO_LOOKBACK)
 
-    # Últimos valores con checks de NaN
     ker_l = ker.iloc[-1] if not ker.isna().all() else 0.5
     vwz_l = vwap_z.iloc[-1] if not vwap_z.isna().all() else 0.0
     slope_l = slope.iloc[-1] if not slope.isna().all() else 0.0
@@ -69,9 +66,9 @@ def compute_pidelta_score(df: pd.DataFrame) -> float:
     mom_l = momentum.iloc[-1] if not momentum.isna().all() else 0.0
     macro_l = macro.iloc[-1] if not macro.isna().all() else 0.5
 
-    trend = np.tanh(slope_l)  # -1 a 1
-    regime = ker_l  # 0 a 1
-    macro_score = macro_l  # 0 a 1
+    trend = np.tanh(slope_l)
+    regime = ker_l
+    macro_score = macro_l
     strength = min(1.0, adx_l / 40.0)
     mom_score = min(1.0, abs(mom_l) / 5.0)
 
@@ -82,7 +79,6 @@ def compute_pidelta_score(df: pd.DataFrame) -> float:
            config.PIDELTA_WEIGHTS.get('momentum', 0.10) * mom_score)
     return float(np.tanh(raw))
 
-# ---------- Interfaz para main.py ----------
 def get_best_signal(symbols: List[str], df_dict: Dict[str, pd.DataFrame]) -> Optional[Dict]:
     best_score = -999
     best_signal = None
