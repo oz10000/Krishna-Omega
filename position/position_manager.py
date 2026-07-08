@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -35,7 +36,6 @@ class PositionManager:
 
     def update(self, current_price: float, pnl_pct: float, elapsed_minutes: float,
                adx: Optional[float] = None) -> dict:
-        # 1. Break Even
         be_activated = self.be_engine.update(elapsed_minutes, current_price, pnl_pct, adx)
         if be_activated:
             be_price = self.be_engine.get_be_price()
@@ -43,12 +43,10 @@ class PositionManager:
                 log_info("PositionManager", f"Break Even activado a {be_price:.2f}")
                 return {'action': 'modify_sl', 'price': be_price}
 
-        # 2. Timeout
         if elapsed_minutes >= self.config.MAX_HOLD_MINUTES:
             log_info("PositionManager", f"Timeout: {elapsed_minutes:.1f} min")
             return {'action': 'close', 'reason': 'Timeout'}
 
-        # 3. Trailing (si PnL > 2%)
         if pnl_pct > 2.0 and not self._trailing_activated:
             self.activate_trailing()
             return {'action': 'activate_trailing', 'callback': self.get_trailing_callback()}
