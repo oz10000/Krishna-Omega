@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -12,7 +13,6 @@ def simulate_trade(signal, df, entry_idx, entry_price, entry_time,
     sl_raw = signal['sl']
     size = trade_notional / entry_price
 
-    # Aplicar slippage a entrada
     if direction == 'Long':
         entry_price_adj = entry_price * (1 + slippage)
     else:
@@ -33,7 +33,6 @@ def simulate_trade(signal, df, entry_idx, entry_price, entry_time,
         elapsed_velas = j - entry_idx
         elapsed_minutes = elapsed_velas * 5
 
-        # Aplicar slippage a TP/SL
         if direction == 'Long':
             tp_eff = tp_raw * (1 - slippage)
             sl_eff = sl_raw * (1 + slippage)
@@ -57,7 +56,6 @@ def simulate_trade(signal, df, entry_idx, entry_price, entry_time,
                 result = 'SL'
                 break
 
-        # Break Even
         if elapsed_minutes >= config.BREAK_EVEN_MINUTES:
             pnl_pct = (close - entry_price_adj) / entry_price_adj * 100 if direction == 'Long' else (entry_price_adj - close) / entry_price_adj * 100
             if pnl_pct > be_buffer:
@@ -70,7 +68,6 @@ def simulate_trade(signal, df, entry_idx, entry_price, entry_time,
 
         exit_time = df.iloc[j]['ts']
 
-    # Comisiones
     pnl_usdt = (exit_price - entry_price_adj) * size if direction == 'Long' else (entry_price_adj - exit_price) * size
     pnl_usdt -= pnl_usdt * commission * 2
 
