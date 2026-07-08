@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -5,9 +6,7 @@ import os
 import time
 import config
 from exchange.okx_exchange import OKXExchange
-from position.position_manager import PositionManager
-from models import Position
-from telemetry import log_info, log_success, log_error
+from telemetry import log_info, log_error, log_success
 
 def main():
     log_info("Demo", "Iniciando modo DEMO")
@@ -20,41 +19,37 @@ def main():
 
     exchange = OKXExchange(api_key, secret, passphrase, demo=True)
     if not exchange.connect():
-        log_error("Demo", "Conexión fallida")
+        log_error("Demo", "Conexion fallida")
         return
-    log_success("Demo", "Conexión OKX establecida")
+    log_success("Demo", "Conexion OKX establecida")
 
-    # Balance
     bal = exchange.get_balance()
     if bal.get('ok'):
         log_success("Demo", f"Balance: {bal['data'].total:.2f} USDT")
     else:
         log_error("Demo", "Error obteniendo balance")
 
-    # Posiciones
     pos = exchange.get_positions()
     if pos.get('ok'):
         log_success("Demo", f"Posiciones activas: {len(pos['data'])}")
-        for p in pos['data']:
-            log_info("Demo", f"  {p.symbol} {p.side} size={p.size} PnL={p.pnl:.2f}")
     else:
         log_error("Demo", "Error obteniendo posiciones")
 
-    # Crear orden de prueba (solo si no hay posiciones)
-    if not pos.get('data'):
-        symbol = 'BTC-USDT-SWAP'
-        size = 0.001
-        order = exchange.place_market_order(symbol, 'buy', size, leverage=1)
-        if order.get('ok'):
-            log_success("Demo", f"Orden market creada: {order['data'].ord_id}")
-            time.sleep(2)
-            # Cancelar
-            cancel = exchange.cancel_order(symbol, order['data'].ord_id)
-            if cancel.get('ok'):
-                log_success("Demo", "Orden cancelada")
-            else:
-                log_error("Demo", "Fallo al cancelar")
+    test_symbol = 'BTC-USDT-SWAP'
+    test_size = 0.001
+    order = exchange.place_market_order(test_symbol, 'buy', test_size, leverage=1)
+    if order.get('ok'):
+        log_success("Demo", f"Orden market creada: {order['data'].ord_id}")
+        time.sleep(2)
+        cancel = exchange.cancel_order(test_symbol, order['data'].ord_id)
+        if cancel.get('ok'):
+            log_success("Demo", "Orden cancelada")
         else:
-            log_error("Demo", f"Error creando orden: {order.get('error')}")
+            log_error("Demo", "Fallo al cancelar")
+    else:
+        log_error("Demo", f"Error creando orden: {order.get('error')}")
 
-    log_success("Demo", "✅ DEMO MODE COMPLETADO")
+    log_success("Demo", "DEMO MODE COMPLETADO")
+
+if __name__ == "__main__":
+    main()
