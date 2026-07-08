@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -26,7 +27,6 @@ class OKXExchange:
         self._instrument_cache = {}
         log_info("Exchange", "Instancia creada", {"demo": demo})
 
-    # ---------- AUTENTICACIÓN ----------
     def _get_server_timestamp_iso(self) -> Tuple[str, int]:
         try:
             resp = self.session.get(f"{self.base_url}/api/v5/public/time", timeout=5)
@@ -84,24 +84,23 @@ class OKXExchange:
                 log_debug("Exchange", "Request OK", {"endpoint": endpoint})
                 return {'ok': True, 'data': data, 'error': None}
             except Exception as e:
-                log_warning("Exchange", f"Request falló (intento {attempt}/{retries})",
+                log_warning("Exchange", f"Request fallo (intento {attempt}/{retries})",
                             {"endpoint": endpoint, "error": str(e)})
                 if attempt == retries:
                     return {'ok': False, 'error': str(e), 'data': None}
                 time.sleep(1 * (2 ** (attempt - 1)))
         return {'ok': False, 'error': 'Max retries exceeded', 'data': None}
 
-    # ---------- CONEXIÓN Y BALANCE ----------
     def connect(self) -> bool:
         try:
             result = self._request('GET', '/api/v5/public/time', retries=2)
             if result.get('ok'):
                 self._connected = True
-                log_info("Exchange", "Conexión exitosa")
+                log_info("Exchange", "Conexion exitosa")
                 return True
             return False
         except Exception as e:
-            log_error("Exchange", "Conexión fallida", {"error": str(e)})
+            log_error("Exchange", "Conexion fallida", {"error": str(e)})
             return False
 
     def get_balance(self, currency: str = 'USDT') -> Dict:
@@ -143,7 +142,6 @@ class OKXExchange:
                 ))
         return {'ok': True, 'data': positions, 'error': None}
 
-    # ---------- ÓRDENES ----------
     def place_market_order(self, inst_id: str, side: str, size: float, leverage: int = 10) -> Dict:
         if not self._connected:
             return {'ok': False, 'error': 'No conectado', 'data': None}
@@ -165,7 +163,6 @@ class OKXExchange:
         return {'ok': True, 'data': OrderResult(ord_id=order_data.get('ordId', '')),
                 'error': None}
 
-    # ---------- ÓRDENES ALGORÍTMICAS (desde v2) ----------
     def place_algo_order(self, inst_id: str, side: str, size: float,
                          tp_price: Optional[float] = None,
                          sl_price: Optional[float] = None,
