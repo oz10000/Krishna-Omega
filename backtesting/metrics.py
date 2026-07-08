@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -17,7 +18,6 @@ def calculate_metrics(trades, initial_capital, final_equity):
     profit_factor = total_win / total_loss if total_loss > 0 else float('inf')
     expectancy = np.mean(pnls)
 
-    # Drawdown
     equity = [initial_capital]
     for p in pnls:
         equity.append(equity[-1] + p)
@@ -28,12 +28,11 @@ def calculate_metrics(trades, initial_capital, final_equity):
             peak = e
         dd = max(dd, (peak - e)/peak*100 if peak > 0 else 0)
 
-    # Sharpe (anualizado, asumiendo 30 días = 8640 velas de 5m)
     returns = pnls
     if len(returns) > 1:
         mean_ret = np.mean(returns)
         std_ret = np.std(returns) if np.std(returns) > 0 else 0.01
-        sharpe = (mean_ret / std_ret) * np.sqrt(30*24*12)  # ~8640 periodos en 30 días
+        sharpe = (mean_ret / std_ret) * np.sqrt(30*24*12)
     else:
         sharpe = 0
 
